@@ -1,0 +1,5 @@
+# Excel files
+*.xlsx
+
+# Print stylesheet
+css/print-bang-diem.css

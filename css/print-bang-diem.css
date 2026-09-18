@@ -1,0 +1,341 @@
+/* =============================================================================
+   css/print-bang-diem.css — tờ bảng điểm cá nhân khổ A5 ngang (210 × 148 mm)
+   Dựng theo mẫu Bang diem (KHỔ A5).docx đã phân tích.
+   Mọi số đo lấy từ file Word, sai số ≤ 0,01 mm.
+   ============================================================================= */
+@page { size: 210mm 148mm; margin: 0 }
+
+.page {
+  position: relative;
+  width: 210mm;
+  height: 148mm;
+  background: #fff;
+  overflow: hidden;
+  margin: 0 auto 12px;
+  box-shadow: 0 2px 18px rgba(0,0,0,.45);
+  font-family: "Times New Roman", "Tinos", "Liberation Serif", serif;
+  font-size: 11pt;
+  line-height: 1.15;
+  color: #000;
+}
+
+.ink {
+  position: absolute;
+  inset: 0;
+  transform: translate(var(--dx, 0mm), var(--dy, 0mm));
+}
+
+.doc {
+  position: absolute;
+  left: 22.5mm;
+  top: 5mm;
+  width: 165mm;
+  height: 138mm;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tab center của Word — xem giải thích trong print-chung-chi.css */
+.cx { text-align: center; margin-left: var(--ml); width: var(--w) }
+
+/* Hai khối trên một dòng — hai hộp cạnh nhau, mỗi hộp có tâm riêng */
+.row2 {
+  display: grid;
+  align-items: start;
+  margin-left: var(--ml);
+  grid-template-columns: var(--a) var(--b);
+  column-gap: var(--g);
+}
+.row2 > * { text-align: center }
+
+/* Tọa độ các khối header — tính từ lề trái (22.5mm) */
+/* BỘ NÔNG NGHIỆP ... | CỘNG HÒA ... */
+.r1 {
+  --ml: 0mm;
+  --a: 70mm;
+  --g: 5mm;
+  --b: 90mm;
+  font-size: 11pt;
+}
+.r1 .l { letter-spacing: -0.5pt; }
+.r1 .r { font-weight: bold; }
+
+/* TRƯỜNG CHÍNH SÁCH ... | Độc lập – Tự do – Hạnh phúc */
+.r2 {
+  --ml: -5mm;
+  --a: 75mm;
+  --g: 5mm;
+  --b: 80mm;
+  margin-top: 2pt;
+}
+.r2 .l { letter-spacing: -0.8pt; font-weight: bold; }
+.r2 .r { font-size: 11pt; font-style: italic; }
+
+/* Số bảng điểm */
+.so-ky {
+  margin-left: 0;
+  margin-top: 8pt;
+  font-size: 11pt;
+}
+
+/* Tiêu đề BẢNG ĐIỂM */
+.tieude {
+  text-align: center;
+  font-size: 16pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin: 6pt 0 4pt;
+  letter-spacing: 1pt;
+}
+
+/* Tên lớp */
+.tenlop {
+  text-align: center;
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 0 0 8pt;
+  line-height: 1.3;
+}
+
+/* Thông tin học viên */
+.thong-tin {
+  margin: 6pt 0;
+  font-size: 11pt;
+}
+.thong-tin .dong {
+  margin: 2pt 0;
+}
+.thong-tin .dong b {
+  min-width: 100px;
+  display: inline-block;
+}
+
+/* Bảng điểm môn học */
+.bang-diem {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8pt 0;
+  font-size: 11pt;
+}
+.bang-diem th,
+.bang-diem td {
+  border: 0.5pt solid #000;
+  padding: 4pt 6pt;
+  text-align: left;
+}
+.bang-diem th {
+  font-weight: bold;
+  text-align: center;
+  background: #f5f5f5;
+}
+.bang-diem td:last-child {
+  text-align: center;
+}
+
+/* Tổng kết điểm */
+.tong-ket {
+  margin: 6pt 0;
+  font-size: 11pt;
+}
+.tong-ket .dong {
+  margin: 2pt 0;
+}
+.tong-ket .dong b {
+  min-width: 140px;
+  display: inline-block;
+}
+
+/* Footer: ngày ký và chữ ký */
+.footer {
+  margin-top: 8pt;
+}
+.ngayky {
+  text-align: right;
+  font-size: 11pt;
+  font-style: italic;
+  margin-bottom: 8pt;
+}
+
+/* Khối chữ ký — dùng row2 r8 như chứng chỉ */
+.r8 {
+  --ml: 0mm;
+  --a: 80mm;
+  --g: 5mm;
+  --b: 80mm;
+}
+.r8 .l {
+  font-size: 11pt;
+}
+.r8 .r {
+  font-size: 12pt;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.chucdanh-tren {
+  font-size: 11pt;
+  font-weight: bold;
+  text-transform: uppercase;
+  line-height: 1.3;
+  margin-bottom: 2pt;
+}
+
+.kygap {
+  height: 28mm;
+  min-height: 28mm;
+}
+
+.chucdanh-ky {
+  font-size: 11pt;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.ten-ky {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+/* Ghi chú cuối */
+.ghichu {
+  margin-top: 8pt;
+  font-size: 10pt;
+  font-style: italic;
+}
+
+/* ============================================================
+   KHUNG CĂN CHỈNH (in lên giấy trắng để soi lên phôi)
+   ============================================================ */
+.guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+.showguides .guides {
+  display: block;
+}
+.g-paper {
+  position: absolute;
+  inset: 0;
+  border: 0.2mm dashed var(--reg-cyan, cyan);
+}
+.g-margin {
+  position: absolute;
+  left: 22.5mm;
+  top: 5mm;
+  width: 165mm;
+  height: 138mm;
+  border: 0.2mm solid var(--reg-cyan, cyan);
+  opacity: 0.85;
+}
+.g-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 0.2mm solid var(--reg-cyan, cyan);
+  opacity: 0.75;
+}
+.g-lab {
+  position: absolute;
+  top: 0.6mm;
+  font-family: var(--ui, sans-serif);
+  font-size: 6pt;
+  color: var(--reg-mag, magenta);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.g-tick {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 2mm;
+  border-left: 0.15mm solid var(--reg-cyan, cyan);
+  opacity: 0.6;
+}
+.g-tickL {
+  position: absolute;
+  left: 0;
+  height: 0;
+  width: 2mm;
+  border-top: 0.15mm solid var(--reg-cyan, cyan);
+  opacity: 0.6;
+}
+.g-mark {
+  position: absolute;
+  width: 4mm;
+  height: 4mm;
+  border: 0.2mm solid var(--reg-mag, magenta);
+}
+
+/* ---------- khung xem trước trên màn hình ---------------------------- */
+.ban {
+  background: #23282e;
+  border-radius: 8px;
+  padding: 18px 12px;
+  overflow: auto;
+}
+.sheets {
+  transform: scale(var(--z, 0.75));
+  transform-origin: top center;
+  width: 210mm;
+  margin: 0 auto;
+}
+.thanh-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #c6ccd3;
+  font-size: 12px;
+  margin-bottom: 10px;
+  padding: 0 6px;
+}
+.thanh-zoom input[type=range] {
+  flex: 1;
+  accent-color: #7fb2dd;
+}
+.trong-ban {
+  color: #c6ccd3;
+  text-align: center;
+  padding: 40px 0;
+  font-size: 13px;
+}
+
+@media print {
+  /* Khung ứng dụng rộng hơn khổ giấy. Không ép các khối bao ngoài về đúng bề rộng
+     trang thì Chrome coi phần thừa bên phải là một trang nữa và in ra tờ trắng. */
+  html, body, .vo, .than, .row, .row > * {
+    width: 210mm !important;
+    max-width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .canh, .dinh, .khong-in, .tieu-trang {
+    display: none !important;
+  }
+  .vo { display: block; }
+  .than { padding: 0; }
+  body { background: #fff; }
+  .ban {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .sheets {
+    transform: none;
+    width: auto;
+    margin: 0;
+  }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    break-after: page;
+    page-break-after: always;
+  }
+  .page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}
