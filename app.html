@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống quản lý lớp học - Trường Chính sách công và PTNT</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+    
+    <!-- Tabler CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.5.1/dist/css/tabler.min.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* Login Styles */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        /* App Layout */
+        .vo {
+            display: none;
+            min-height: 100vh;
+            background: #f5f7fb;
+        }
+
+        .vo.active {
+            display: flex;
+        }
+
+        /* Sidebar Navigation */
+        .canh {
+            width: 260px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .dau-trang {
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .hieu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .dau-hieu {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ic {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .dau-hieu .ic {
+            stroke: white;
+        }
+
+        .hieu span b {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .hieu span span {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .nut-gon {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .nhom {
+            padding: 12px 16px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .mi {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .mi:hover {
+            background: #f5f7fb;
+        }
+
+        .mi[aria-current="page"] {
+            background: #f0f4ff;
+            color: #667eea;
+            border-right: 3px solid #667eea;
+        }
+
+        .chan {
+            padding: 16px;
+            font-size: 11px;
+            color: #999;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 16px;
+        }
+
+        /* Main Content */
+        main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* Header */
+        .dinh {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .lop-chon {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .lop-chon label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .lop-chon select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .tim {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .tim svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            color: #999;
+        }
+
+        .tim input {
+            width: 100%;
+            padding: 10px 12px 10px 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .toi-la {
+            margin-left: auto;
+        }
+
+        .toi-la select {
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        /* Page Content */
+        .tieu-trang {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .tieu-trang h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .tieu-trang p {
+            color: #666;
+            font-size: 14px;
+            max-width: 600px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: white;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: #f5f7fb;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        /* Progress Bars */
+        .tien-do {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .chang {
+            background: #f5f7fb;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .chang.co-dau {
+            background: #e8f5e9;
+        }
+
+        .chang.chua {
+            background: #fff3e0;
+        }
+
+        .ten {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .dem {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .phu {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .thanh {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .thanh i {
+            display: block;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+
+        .table tbody tr:hover {
+            background: #f5f7fb;
+        }
+
+        /* Labels */
+        .nhan {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .nhan cho {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .nhan xong {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .nhan tam {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .nhan dau {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* Utility Classes */
+        .mb-3 { margin-bottom: 16px !important; }
+        .mt-2 { margin-top: 8px !important; }
+        .mt-3 { margin-top: 12px !important; }
+        .mb-2 { margin-bottom: 8px !important; }
+        .gap-2 { gap: 8px !important; }
+        .gap-3 { gap: 12px !important; }
+        .d-flex { display: flex !important; }
+        .flex-wrap { flex-wrap: wrap !important; }
+        .align-items-center { align-items: center !important; }
+        .justify-content-between { justify-content: space-between !important; }
+        .text-secondary { color: #666 !important; }
+        .fw-medium { font-weight: 500 !important; }
+        .text-reset { color: inherit !important; }
+        .text-decoration-none { text-decoration: none !important; }
+        .w-100 { width: 100% !important; }
+        .ms-auto { margin-left: auto !important; }
+
+        /* Form Elements */
+        .form-control, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* Grid System */
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -8px;
+        }
+
+        .col-lg-8, .col-lg-4, .col-xl-8, .col-xl-4, .col-md-6, .col-md-3, .col-md-9, .col-sm-6, .col-xl-3 {
+            padding: 0 8px;
+        }
+
+        .col-lg-8 { flex: 0 0 66.666667%; }
+        .col-lg-4 { flex: 0 0 33.333333%; }
+        .col-xl-8 { flex: 0 0 66.666667%; }
+        .col-xl-4 { flex: 0 0 33.333333%; }
+        .col-md-6 { flex: 0 0 50%; }
+        .col-md-3 { flex: 0 0 25%; }
+        .col-md-9 { flex: 0 0 75%; }
+        .col-sm-6 { flex: 0 0 50%; }
+        .col-xl-3 { flex: 0 0 25%; }
+
+        /* Quick Links */
+        .loi-tat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .loi-tat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .loi-tat .o {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loi-tat .o .ic {
+            stroke: white;
+        }
+
+        .loi-tat span b {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .loi-tat span span {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .canh {
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+
+            .canh.active {
+                transform: translateX(0);
+            }
+
+            main {
+                margin-left: 0;
+            }
+
+            .nut-gon {
+                display: block;
+            }
+
+            .col-lg-8, .col-lg-4, .col-xl-8, .col-xl-4, .col-md-6, .col-md-3, .col-md-9, .col-sm-6, .col-xl-3 {
+                flex: 0 0 100%;
+            }
+        }
+
+        /* Print Preview Area */
+        .cot-xem {
+            background: #f5f7fb;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 400px;
+        }
+
+        .ban {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .thanh-zoom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .thanh-zoom input[type="range"] {
+            flex: 1;
+        }
+
+        .sheets {
+            min-height: 300px;
+            background: #fafafa;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        /* File Upload */
+        .tha {
+            text-align: center;
+            padding: 40px 20px;
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .tha:hover {
+            border-color: #667eea;
+        }
+
+        .tha .ic {
+            width: 48px;
+            height: 48px;
+            color: #667eea;
+            margin-bottom: 16px;
+        }
+
+        .tha h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .tha p {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        /* Records List */
+        .recs {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0 20px;
+        }
+
+        .rec-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rec-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Tables with sticky header */
+        .bang-soat thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        /* Warning Box */
+        .ghi-chu-mau {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            background: #fff3e0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .ghi-chu-mau .ic {
+            width: 20px;
+            height: 20px;
+            color: #e65100;
+            flex-shrink: 0;
+        }
+
+        .ghi-chu-mau span {
+            font-size: 13px;
+            color: #666;
+        }
+
+        /* Class Info */
+        .dong-lop {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .dong-lop span {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="login-wrapper">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔐 Đăng nhập</h1>
+                <p>Hệ thống quản lý lớp học</p>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        required 
+                        placeholder="nhap@email.com"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required 
+                        placeholder="••••••••"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    Đăng nhập
+                </button>
+            </form>
+
+            <div id="loadingMessage" class="loading">
+                Đang xử lý...
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp" class="vo">
+        <!-- SIDEBAR NAVIGATION -->
+        <nav class="canh" aria-label="Điều hướng chính">
+            <div class="dau-trang">
+                <a class="hieu" href="#" data-page="index">
+                    <span class="dau-hieu">
+                        <img src="assets/logo.png" alt="" onerror="this.remove()">
+                        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M12 15a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                            <path d="M13 17.5v4.5l2 -1.5l2 1.5v-4.5"/>
+                            <path d="M10 19h-5a2 2 0 0 1 -2 -2v-10c0 -1.1 .9 -2 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -1 1.73"/>
+                            <path d="M6 9l12 0"/>
+                            <path d="M6 12l3 0"/>
+                            <path d="M6 15l2 0"/>
+                        </svg>
+                    </span>
+                    <span><b>Cấp chứng chỉ</b><span>Trường Chính sách công và PTNT</span></span>
+                </a>
+                <button type="button" class="nut-gon" aria-expanded="true">
+                    <svg class="ic xoay" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M11 7l-5 5l5 5"/>
+                        <path d="M17 7l-5 5l5 5"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="nhom">Công việc</div>
+            <a class="mi" href="#" data-page="index" aria-current="page">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1"/>
+                    <path d="M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1"/>
+                    <path d="M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1"/>
+                    <path d="M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1"/>
+                </svg>
+                <span>Bảng điều khiển</span>
+            </a>
+            <a class="mi" href="#" data-page="lop-hoc">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/>
+                    <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    <path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>
+                </svg>
+                <span>Lớp học</span>
+            </a>
+            
+            <div class="nhom">Cấp phát</div>
+            <a class="mi" href="#" data-page="chung-chi">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 15a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                    <path d="M13 17.5v4.5l2 -1.5l2 1.5v-4.5"/>
+                    <path d="M10 19h-5a2 2 0 0 1 -2 -2v-10c0 -1.1 .9 -2 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -1 1.73"/>
+                    <path d="M6 9l12 0"/>
+                    <path d="M6 12l3 0"/>
+                    <path d="M6 15l2 0"/>
+                </svg>
+                <span>Chứng chỉ</span>
+            </a>
+            <a class="mi" href="#" data-page="chung-nhan">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M15 21h-9a3 3 0 0 1 -3 -3v-1h10v2a2 2 0 0 0 4 0v-14a2 2 0 1 1 2 2h-2m2 -4h-11a3 3 0 0 0 -3 3v11"/>
+                    <path d="M9 7l4 0"/>
+                    <path d="M9 11l4 0"/>
+                </svg>
+                <span>Chứng nhận</span>
+            </a>
+            <a class="mi" href="#" data-page="bang-diem">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/>
+                    <path d="M8 11h8v7h-8l0 -7"/>
+                    <path d="M8 15h8"/>
+                    <path d="M11 11v7"/>
+                </svg>
+                <span>Bảng điểm</span>
+            </a>
+            <a class="mi" href="#" data-page="chung-chi-bang-diem">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/>
+                    <path d="M9 9l1 0"/>
+                    <path d="M9 13l6 0"/>
+                    <path d="M9 17l6 0"/>
+                </svg>
+                <span>Chứng chỉ kèm bảng điểm</span>
+            </a>
+            
+            <div class="nhom">Sau khi in</div>
+            <a class="mi" href="#" data-page="tem-thu">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3 7h3"/>
+                    <path d="M3 11h2"/>
+                    <path d="M9.02 8.801l-.6 6a2 2 0 0 0 1.99 2.199h7.98a2 2 0 0 0 1.99 -1.801l.6 -6a2 2 0 0 0 -1.99 -2.199h-7.98a2 2 0 0 0 -1.99 1.801"/>
+                    <path d="M9.8 7.5l2.982 3.28a3 3 0 0 0 4.238 .202l3.28 -2.982"/>
+                </svg>
+                <span>Tem thư</span>
+            </a>
+            <a class="mi" href="#" data-page="tra-cuu">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                    <path d="M21 21l-6 -6"/>
+                </svg>
+                <span>Tra cứu và in lại</span>
+            </a>
+            
+            <div class="nhom">Hệ thống</div>
+            <a class="mi" href="#" data-page="cai-dat">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065"/>
+                    <path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                </svg>
+                <span>Cài đặt</span>
+            </a>
+            <a class="mi" href="#" data-page="nhat-ky" data-chi-admin hidden>
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 8l0 4l2 2"/>
+                    <path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/>
+                </svg>
+                <span>Nhật ký hoạt động</span>
+            </a>
+            
+            <div class="chan">Giai đoạn 0 · dữ liệu chưa nối Firebase</div>
+        </nav>
+
+        <!-- MAIN CONTENT AREA -->
+        <div>
+            <!-- HEADER -->
+            <header class="dinh">
+                <div class="lop-chon">
+                    <label for="lop">Lớp đang làm việc</label>
+                    <select id="lop" name="lop">
+                        <option>Chẩn đoán bệnh động vật – K27 · 64-2026</option>
+                        <option>Chuyên viên và tương đương – K81 · 71-2026</option>
+                        <option>Kiểm lâm viên chính – K12 · 58-2026</option>
+                    </select>
+                </div>
+                <div class="tim">
+                    <svg class="ic" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/>
+                        <path d="M21 21l-6 -6"/>
+                    </svg>
+                    <input type="search" placeholder="Tìm theo số chứng chỉ hoặc họ tên" aria-label="Tìm nhanh">
+                </div>
+                
+                <a class="btn btn-primary btn-sm" href="#" data-page="lop-hoc"><svg class="ic me-1" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3v12"/><path d="M15 12l-3 3l-3 -3"/><path d="M3 12h1"/><path d="M11 3h1"/><path d="M20 12h1"/><path d="M4 21h16a1 1 0 0 0 1 -1v-4a1 1 0 0 0 -1 -1h-16a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1"/></svg>Nạp Excel</a>
+                <div class="toi-la"><select id="toiLa" aria-label="Bạn là ai"></select></div>
+                <button class="btn btn-sm" id="btnLogout" style="margin-left: 8px;">Đăng xuất</button>
+            </header>
+
+            <main class="than">
+                <!-- INDEX PAGE (Dashboard) -->
+                <section id="page-index" class="page-section active">
+                    <div class="tieu-trang">
+                        <div>
+                            <h1>Bảng điều khiển</h1>
+                            <p>Mỗi lớp đi qua bốn chặng: nạp danh sách, gán số, in, gửi thư. Trang này cho biết lớp đang đứng ở đâu và việc gì còn dở.</p>
+                        </div>
+                        <a class="btn" href="#" data-page="lop-hoc">Xem tất cả lớp</a>
+                    </div>
+                    
+                    <p class="ghi-chu-mau mb-3"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0"/><path d="M12 16h.01"/></svg>
+                        <span>Số liệu dưới đây là dữ liệu mẫu để dựng giao diện. Nối Firestore ở giai đoạn 1 thì mới là số thật.</span></p>
+                    
+                    <p class="dong-lop">Chẩn đoán bệnh động vật – K27
+                        <span>· 33 học viên · 15/7 – 26/8/2026 · mã lớp 64-2026</span></p>
+                    
+                    <div class="tien-do mb-3">
+                        <div class="chang">
+                            <div class="ten"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></svg> Đã nạp danh sách</div>
+                            <div class="dem so">33</div>
+                            <div class="phu">từ file Excel ngày 12/9/2026</div>
+                            <div class="thanh"><i style="width:100%"></i></div>
+                        </div>
+                        <div class="chang co-dau">
+                            <div class="ten"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12h3v4h-3l0 -4"/><path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6"/><path d="M10 4a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -3"/><path d="M14 16h2"/><path d="M14 12h2"/></svg> Đã gán số chứng chỉ</div>
+                            <div class="dem so">33</div>
+                            <div class="phu">879 – 911/2026/CC · không có số trùng</div>
+                            <div class="thanh"><i style="width:100%"></i></div>
+                        </div>
+                        <div class="chang">
+                            <div class="ten"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2"/><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4"/><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4"/></svg> Đã in lên phôi</div>
+                            <div class="dem so">20</div>
+                            <div class="phu">còn 13 bản · lần in gần nhất 17/9</div>
+                            <div class="thanh"><i style="width:61%"></i></div>
+                        </div>
+                        <div class="chang chua">
+                            <div class="ten"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7h3"/><path d="M3 11h2"/><path d="M9.02 8.801l-.6 6a2 2 0 0 0 1.99 2.199h7.98a2 2 0 0 0 1.99 -1.801l.6 -6a2 2 0 0 0 -1.99 -2.199h-7.98a2 2 0 0 0 -1.99 1.801"/><path d="M9.8 7.5l2.982 3.28a3 3 0 0 0 4.238 .202l3.28 -2.982"/></svg> Đã gửi thư</div>
+                            <div class="dem so">0</div>
+                            <div class="phu">chưa có danh sách địa chỉ</div>
+                            <div class="thanh"><i style="width:0"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between py-3">
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="nhan cho">Việc tiếp theo</span>
+                                <span style="font-size:13.5px">In 13 chứng chỉ còn lại của lớp K27 lên phôi.</span>
+                            </div>
+                            <a class="btn btn-primary btn-sm" href="#" data-page="chung-chi">Mở trang chứng chỉ</a>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h3 class="card-title">Lớp gần đây</h3>
+                                    <a href="#" data-page="lop-hoc" style="font-size:12.5px">Tất cả lớp</a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table card-table">
+                                        <thead><tr><th>Lớp</th><th>Loại</th><th class="text-end">Học viên</th><th>Số đã cấp</th><th>Tình trạng</th></tr></thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><a href="#" data-page="lop-hoc" class="text-reset text-decoration-none fw-medium">Chẩn đoán bệnh động vật – K27</a>
+                                                    <div class="text-secondary" style="font-size:11.5px">Mã lớp 64-2026</div></td>
+                                                <td>Chứng chỉ</td>
+                                                <td class="so text-end">33</td>
+                                                <td class="so" style="font-size:12.5px">879 – 911/2026/CC</td>
+                                                <td><span class="nhan cho">Còn 13 bản chưa in</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><a href="#" data-page="lop-hoc" class="text-reset text-decoration-none fw-medium">Chuyên viên và tương đương – K81</a>
+                                                    <div class="text-secondary" style="font-size:11.5px">Mã lớp 71-2026</div></td>
+                                                <td>Chứng chỉ</td>
+                                                <td class="so text-end">39</td>
+                                                <td class="so" style="font-size:12.5px">840 – 878/2026/CC</td>
+                                                <td><span class="nhan xong">Đã in đủ, chờ gửi</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><a href="#" data-page="lop-hoc" class="text-reset text-decoration-none fw-medium">Kiểm lâm viên chính – K12</a>
+                                                    <div class="text-secondary" style="font-size:11.5px">Mã lớp 58-2026</div></td>
+                                                <td>Chứng nhận</td>
+                                                <td class="so text-end">27</td>
+                                                <td class="so" style="font-size:12.5px">Chưa gán số</td>
+                                                <td><span class="nhan tam">Mới nạp danh sách</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card mb-3">
+                                <div class="card-header"><h3 class="card-title">Tra cứu một chứng chỉ</h3></div>
+                                <div class="card-body">
+                                    <p class="text-secondary mb-2" style="font-size:12.5px">Nhập số đầy đủ hoặc chỉ phần số để xem hồ sơ, lịch sử in và đối soát thật giả.</p>
+                                    <div class="d-flex gap-2">
+                                        <input class="form-control" placeholder="879 hoặc 879/2026/CC" aria-label="Số chứng chỉ">
+                                        <a class="btn btn-primary" href="#" data-page="tra-cuu">Tìm</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header"><h3 class="card-title">Máy in và phôi</h3></div>
+                                <div class="card-body">
+                                    <dl class="row mb-0" style="font-size:12.5px">
+                                        <dt class="col-6 fw-normal text-secondary">Khổ chứng chỉ</dt><dd class="col-6 so mb-1">190 × 135 mm</dd>
+                                        <dt class="col-6 fw-normal text-secondary">Khổ bảng điểm</dt><dd class="col-6 so mb-1">A5 ngang</dd>
+                                        <dt class="col-6 fw-normal text-secondary">Lệch đã hiệu chỉnh</dt><dd class="col-6 so mb-1">chưa đo</dd>
+                                        <dt class="col-6 fw-normal text-secondary">Times New Roman</dt>
+                                        <dd class="col-6 mb-0"><span class="nhan xong" id="tt-font">có</span></dd>
+                                    </dl>
+                                    <a class="btn btn-sm w-100 mt-3" href="#" data-page="cai-dat">Đo lại độ lệch máy in</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mt-1">
+                        <div class="col-sm-6 col-xl-3"><a class="loi-tat" href="#" data-page="bang-diem">
+                            <span class="o"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/><path d="M8 11h8v7h-8l0 -7"/><path d="M8 15h8"/><path d="M11 11v7"/></svg></span><span><b>Bảng điểm cá nhân</b><span>A5 ngang, in kèm chứng chỉ</span></span></a></div>
+                        <div class="col-sm-6 col-xl-3"><a class="loi-tat" href="#" data-page="chung-nhan">
+                            <span class="o"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 21h-9a3 3 0 0 1 -3 -3v-1h10v2a2 2 0 0 0 4 0v-14a2 2 0 1 1 2 2h-2m2 -4h-11a3 3 0 0 0 -3 3v11"/><path d="M9 7l4 0"/><path d="M9 11l4 0"/></svg></span><span><b>Chứng nhận</b><span>chung phôi, khác câu chữ và hậu tố</span></span></a></div>
+                        <div class="col-sm-6 col-xl-3"><a class="loi-tat" href="#" data-page="tem-thu">
+                            <span class="o"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7h3"/><path d="M3 11h2"/><path d="M9.02 8.801l-.6 6a2 2 0 0 0 1.99 2.199h7.98a2 2 0 0 0 1.99 -1.801l.6 -6a2 2 0 0 0 -1.99 -2.199h-7.98a2 2 0 0 0 -1.99 1.801"/><path d="M9.8 7.5l2.982 3.28a3 3 0 0 0 4.238 .202l3.28 -2.982"/></svg></span><span><b>Tem thư chuyển phát</b><span>gộp người nhận thay</span></span></a></div>
+                        <div class="col-sm-6 col-xl-3"><a class="loi-tat" href="#" data-page="tra-cuu">
+                            <span class="o"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/><path d="M21 21l-6 -6"/></svg></span><span><b>In lại theo yêu cầu</b><span>có ghi lịch sử in</span></span></a></div>
+                    </div>
+                </section>
+
+                <!-- Other pages will be added here as sections -->
+                <section id="page-lop-hoc" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Lớp học</h3></div>
+                        <div class="card-body">
+                            <p>Trang quản lý lớp học - nội dung từ lop-hoc.html</p>
+                            <div class="tha" id="tha">
+                                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3v12"/><path d="M15 12l-3 3l-3 -3"/><path d="M3 12h1"/><path d="M11 3h1"/><path d="M20 12h1"/><path d="M4 21h16a1 1 0 0 0 1 -1v-4a1 1 0 0 0 -1 -1h-16a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1"/></svg>
+                                <h3>Kéo file vào đây</h3>
+                                <p>Hoặc bấm nút bên dưới. File được đọc ngay trong trình duyệt, không gửi đi đâu.</p>
+                                <button class="btn btn-primary" id="btnChon">Chọn file Excel</button>
+                                <input type="file" id="tep" accept=".xls,.xlsx,.xlsm" hidden>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-chung-chi" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Chứng chỉ</h3></div>
+                        <div class="card-body">
+                            <p>Trang in chứng chỉ - nội dung từ chung-chi.html</p>
+                            <div class="row g-3">
+                                <div class="col-xl-8">
+                                    <div class="cot-xem">
+                                        <div class="ban">
+                                            <div class="thanh-zoom">
+                                                <span>Thu phóng</span>
+                                                <input type="range" id="zoom" min="40" max="120" step="5" value="75">
+                                                <span id="zoomval" class="so">75 %</span>
+                                            </div>
+                                            <div class="sheets" id="sheets">Bản xem trước chứng chỉ</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <p class="form-hint">Các tùy chọn in chứng chỉ sẽ hiển thị ở đây</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-chung-nhan" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Chứng nhận</h3></div>
+                        <div class="card-body">
+                            <p>Trang chứng nhận - nội dung từ chung-nhan.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-bang-diem" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Bảng điểm</h3></div>
+                        <div class="card-body">
+                            <p>Trang bảng điểm - nội dung từ bang-diem.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-chung-chi-bang-diem" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Chứng chỉ kèm bảng điểm</h3></div>
+                        <div class="card-body">
+                            <p>Trang chứng chỉ kèm bảng điểm - nội dung từ chung-chi-bang-diem.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-tem-thu" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Tem thư</h3></div>
+                        <div class="card-body">
+                            <p>Trang tem thư - nội dung từ tem-thu.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-tra-cuu" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Tra cứu</h3></div>
+                        <div class="card-body">
+                            <p>Trang tra cứu - nội dung từ tra-cuu.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-cai-dat" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Cài đặt</h3></div>
+                        <div class="card-body">
+                            <p>Trang cài đặt - nội dung từ cai-dat.html</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-nhat-ky" class="page-section">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title">Nhật ký hoạt động</h3></div>
+                        <div class="card-body">
+                            <p>Trang nhật ký - nội dung từ nhat-ky.html</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB3lDKv3UZ52u0vNDR3tMUQMhsZ1HMDGL0",
+            authDomain: "cnprd-e5d92.firebaseapp.com",
+            projectId: "cnprd-e5d92",
+            storageBucket: "cnprd-e5d92.firebasestorage.app",
+            messagingSenderId: "664579171182",
+            appId: "1:664579171182:web:ea8fd70c51f1dca12d977f",
+            measurementId: "G-GCPYD6XFG6"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // DOM Elements
+        const loginPage = document.getElementById('loginPage');
+        const mainApp = document.getElementById('mainApp');
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnLogout = document.getElementById('btnLogout');
+
+        // Show/Hide loading and error messages
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loadingMessage.classList.add('show');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Đang xử lý...';
+            } else {
+                loadingMessage.classList.remove('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Đăng nhập';
+            }
+        }
+
+        // Check user permission in Firestore
+        async function checkUserPermission(uid) {
+            try {
+                const userDocRef = doc(db, 'users', uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    return { allowed: false, message: 'Tài khoản chưa được cấp quyền truy cập.' };
+                }
+
+                const userData = userDocSnap.data();
+                
+                if (!userData.active) {
+                    return { allowed: false, message: 'Tài khoản này đã bị vô hiệu hóa.' };
+                }
+
+                return { allowed: true, role: userData.role || 'user' };
+            } catch (error) {
+                console.error('Lỗi kiểm tra quyền:', error);
+                return { allowed: false, message: 'Không thể kiểm tra quyền truy cập.' };
+            }
+        }
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Get returnUrl from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl');
+
+            // Clean URL (remove sensitive params)
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+
+            setLoading(true);
+            errorMessage.classList.remove('show');
+
+            try {
+                // Step 1: Sign in with Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Step 2: Check permissions in Firestore
+                const permissionCheck = await checkUserPermission(user.uid);
+
+                if (!permissionCheck.allowed) {
+                    // If no permission, sign out immediately
+                    await signOut(auth);
+                    throw new Error(permissionCheck.message);
+                }
+
+                // Step 3: Save user info to localStorage
+                localStorage.setItem('userRole', permissionCheck.role);
+                localStorage.setItem('userUID', user.uid);
+
+                // Step 4: Redirect
+                if (returnUrl) {
+                    window.location.href = decodeURIComponent(returnUrl);
+                } else {
+                    showMainApp();
+                }
+
+            } catch (error) {
+                console.error('Lỗi đăng nhập:', error);
+
+                let errorMsg = 'Đăng nhập thất bại. Vui lòng thử lại.';
+
+                if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Email không hợp lệ.';
+                } else if (error.code === 'auth/user-disabled') {
+                    errorMsg = 'Tài khoản này đã bị vô hiệu hóa.';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMsg = 'Email này chưa được đăng ký.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMsg = 'Mật khẩu không đúng.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Quá nhiều lần thử. Vui lòng đợi một lúc.';
+                } else {
+                    errorMsg = error.message || errorMsg;
+                }
+
+                showError(errorMsg);
+                setLoading(false);
+            }
+        });
+
+        // Handle logout
+        btnLogout.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userUID');
+                showLoginPage();
+            } catch (error) {
+                console.error('Lỗi đăng xuất:', error);
+            }
+        });
+
+        // Show main app interface
+        function showMainApp() {
+            loginPage.style.display = 'none';
+            mainApp.classList.add('active');
+            mainApp.style.display = 'flex';
+        }
+
+        // Show login page
+        function showLoginPage() {
+            mainApp.classList.remove('active');
+            mainApp.style.display = 'none';
+            loginPage.style.display = 'flex';
+        }
+
+        // Check authentication state on load
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const permissionCheck = await checkUserPermission(user.uid);
+                if (permissionCheck.allowed) {
+                    localStorage.setItem('userRole', permissionCheck.role);
+                    localStorage.setItem('userUID', user.uid);
+                    showMainApp();
+                } else {
+                    await signOut(auth);
+                    showLoginPage();
+                }
+            } else {
+                showLoginPage();
+            }
+        });
+
+        // SPA Routing - Handle navigation
+        document.querySelectorAll('[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const pageName = link.getAttribute('data-page');
+                navigateTo(pageName);
+            });
+        });
+
+        function navigateTo(pageName) {
+            // Update active section
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            const targetSection = document.getElementById(`page-${pageName}`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // Update active nav link
+            document.querySelectorAll('.mi').forEach(navLink => {
+                navLink.removeAttribute('aria-current');
+                if (navLink.getAttribute('data-page') === pageName) {
+                    navLink.setAttribute('aria-current', 'page');
+                }
+            });
+
+            // Update URL hash (optional, for bookmarking)
+            window.history.pushState({ page: pageName }, '', `#${pageName}`);
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.page) {
+                navigateTo(e.state.page);
+            }
+        });
+
+        // Check for hash on initial load
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                navigateTo(hash);
+            }
+        });
+
+        // Font check
+        const o = document.getElementById('tt-font');
+        if (!document.fonts.check('12pt "Times New Roman"')){
+            o.textContent = 'thiếu'; o.className = 'nhan dau';
+        }
+
+        // Export services for potential use in other scripts
+        window.firebaseServices = { auth, db, analytics };
+    </script>
+</body>
+</html>
