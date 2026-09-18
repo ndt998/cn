@@ -1,26 +1,44 @@
 rules_version = '2';
 /* =============================================================================
-   firestore.rules — dùng cho giai đoạn 1, khi nối Firebase.
-   Đây mới là chỗ chặn thật: chạy trên máy chủ Google, người dùng không sửa được.
-   Mã admin tạm trong js/quyen.js chỉ là chốt cửa giao diện, phải xóa khi bật file này.
+   firestore.rules — Bảo mật Firestore cho hệ thống Chứng chỉ & Bảng điểm
+   
+   ĐỐI TƯỢNG SỬ DỤNG: Chỉ người nội bộ (có tài khoản trong collection users)
+   
+   PHÂN QUYỀN:
+   - Admin: toàn quyền (đọc/ghi/xóa)
+   - quanLyLop: đọc tất cả, tạo/sửa lớp và chứng chỉ, KHÔNG xóa được
+   - Nhật ký: ai cũng ghi được, chỉ admin đọc được, không ai sửa/xóa được
+   
+   LƯU Ý QUAN TRỌNG:
+   - File này chạy trên máy chủ Google → đây là chốt bảo mật THẬT
+   - Mã admin trong js/quyen.js chỉ là lớp UI, sẽ xóa khi bật rules này
+   - Phải deploy file này trước khi đưa vào sử dụng chính thức
    ============================================================================= */
 service cloud.firestore {
   match /databases/{db}/documents {
 
-    /* --- tiện ích --- */
+    /* --- TIỆN ÍCH --- */
     function dangNhap()   { return request.auth != null; }
     function hoSo()       { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
     function duocVao()    { return dangNhap() && hoSo().active == true; }
     function laAdmin()    { return duocVao() && hoSo().vaiTro == 'admin'; }
 
-    /* --- danh sách người dùng: ai cũng đọc được hồ sơ của chính mình,
-           chỉ admin mới thêm, sửa, khóa người khác --- */
+    /* --- COLLECTION: users ---
+       Quản lý người dùng nội bộ. Chỉ người có email trong danh sách mới được truy cập.
+       - Đọc: admin đọc tất cả, mỗi user đọc được chính mình
+       - Ghi: chỉ admin mới thêm/sửa/xóa
+    */
     match /users/{uid} {
       allow read:  if dangNhap() && (request.auth.uid == uid || laAdmin());
       allow write: if laAdmin();
     }
 
-    /* --- lớp học --- */
+    /* --- COLLECTION: classes ---
+       Lưu thông tin lớp học đã qua xử lý
+       - Đọc: mọi người nội bộ đều đọc được
+       - Tạo/Sửa: mọi người nội bộ đều làm được
+       - Xóa: chỉ admin
+    */
     match /classes/{id} {
       allow read:   if duocVao();
       allow create: if duocVao();
@@ -28,8 +46,11 @@ service cloud.firestore {
       allow delete: if laAdmin();
     }
 
-    /* --- chứng chỉ: ID chính là số hiệu đã chuẩn hóa nên không thể cấp trùng.
-           Không cho xóa, chỉ cho đổi trạng thái sang thuHoi. --- */
+    /* --- COLLECTION: certificates ---
+       Chứng chỉ & Chứng nhận đã cấp
+       - ID document = số chuẩn hóa → chống trùng tự động
+       - Không cho xóa, chỉ cho đổi trạng thái sang thuHoi
+    */
     match /certificates/{so} {
       allow read:   if duocVao();
       allow create: if duocVao() && !exists(/databases/$(db)/documents/certificates/$(so));
@@ -37,12 +58,38 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /shipments/{id} { allow read, write: if duocVao(); }
-    match /signers/{id}   { allow read: if duocVao(); allow write: if laAdmin(); }
-    match /settings/{id}  { allow read: if duocVao(); allow write: if laAdmin(); }
+    /* --- COLLECTION: shipments ---
+       Quản lý tem thư chuyển phát
+       - Đọc/Ghi: mọi người nội bộ
+    */
+    match /shipments/{id} {
+      allow read, write: if duocVao();
+    }
 
-    /* --- nhật ký: ai cũng ghi được, CHỈ ADMIN ĐỌC, và không ai sửa hay xóa
-           được dòng đã ghi, kể cả admin. Có vậy dấu vết mới đáng tin. --- */
+    /* --- COLLECTION: signers ---
+       Danh sách người ký
+       - Đọc: mọi người nội bộ
+       - Ghi: chỉ admin
+    */
+    match /signers/{id} {
+      allow read:  if duocVao();
+      allow write: if laAdmin();
+    }
+
+    /* --- COLLECTION: settings ---
+       Cấu hình hệ thống (singleton)
+       - Đọc: mọi người nội bộ
+       - Ghi: chỉ admin
+    */
+    match /settings/{id} {
+      allow read:  if duocVao();
+      allow write: if laAdmin();
+    }
+
+    /* --- COLLECTION: nhat_ky ---
+       Nhật ký hoạt động — CHỈ ADMIN ĐỌC, KHÔNG AI SỬA/XÓA
+       Đây là tính năng audit quan trọng để đối soát sau này
+    */
     match /nhat_ky/{id} {
       allow create: if duocVao()
                     && request.resource.data.uid == request.auth.uid
