@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Hệ thống quản lý lớp học</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 Đăng nhập</h1>
+            <p>Hệ thống quản lý lớp học</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    placeholder="nhap@email.com"
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <button type="submit" class="btn-login" id="loginBtn">
+                Đăng nhập
+            </button>
+        </form>
+
+        <div id="loadingMessage" class="loading">
+            Đang xử lý...
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const loginBtn = document.getElementById('loginBtn');
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loadingMessage.classList.add('show');
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Đang xử lý...';
+            } else {
+                loadingMessage.classList.remove('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Đăng nhập';
+            }
+        }
+
+        async function checkUserPermission(uid) {
+            try {
+                // Kiểm tra xem user có tồn tại trong collection 'users' và active không
+                const userDocRef = doc(db, 'users', uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    return { allowed: false, message: 'Tài khoản chưa được cấp quyền truy cập.' };
+                }
+
+                const userData = userDocSnap.data();
+                
+                if (!userData.active) {
+                    return { allowed: false, message: 'Tài khoản này đã bị vô hiệu hóa.' };
+                }
+
+                return { allowed: true, role: userData.role || 'user' };
+            } catch (error) {
+                console.error('Lỗi kiểm tra quyền:', error);
+                return { allowed: false, message: 'Không thể kiểm tra quyền truy cập.' };
+            }
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            setLoading(true);
+            errorMessage.classList.remove('show');
+
+            try {
+                // Bước 1: Đăng nhập với Firebase Auth
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Bước 2: Kiểm tra quyền trong Firestore
+                const permissionCheck = await checkUserPermission(user.uid);
+
+                if (!permissionCheck.allowed) {
+                    // Nếu không có quyền, đăng xuất ngay
+                    await signOut(auth);
+                    throw new Error(permissionCheck.message);
+                }
+
+                // Bước 3: Lưu thông tin user vào localStorage (nếu cần)
+                localStorage.setItem('userRole', permissionCheck.role);
+                localStorage.setItem('userUID', user.uid);
+
+                // Bước 4: Chuyển hướng đến trang chính
+                window.location.href = 'index.html';
+
+            } catch (error) {
+                console.error('Lỗi đăng nhập:', error);
+                
+                let errorMsg = 'Đăng nhập thất bại. Vui lòng thử lại.';
+                
+                if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Email không hợp lệ.';
+                } else if (error.code === 'auth/user-disabled') {
+                    errorMsg = 'Tài khoản này đã bị vô hiệu hóa.';
+                } else if (error.code === 'auth/user-not-found') {
+                    errorMsg = 'Email này chưa được đăng ký.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMsg = 'Mật khẩu không đúng.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Quá nhiều lần thử. Vui lòng đợi một lúc.';
+                } else {
+                    errorMsg = error.message || errorMsg;
+                }
+
+                showError(errorMsg);
+                setLoading(false);
+            }
+        });
+
+        // Kiểm tra nếu đã đăng nhập thì chuyển hướng
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Đã đăng nhập, kiểm tra quyền
+                checkUserPermission(user.uid).then(result => {
+                    if (result.allowed) {
+                        window.location.href = 'index.html';
+                    } else {
+                        signOut(auth);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
