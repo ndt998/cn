@@ -130,7 +130,7 @@
 
         <div id="errorMessage" class="error-message"></div>
 
-        <form id="loginForm">
+        <form id="loginForm" method="post">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input 
@@ -277,9 +277,20 @@
                 localStorage.setItem('userRole', permissionCheck.role);
                 localStorage.setItem('userUID', user.uid);
 
-                // Bước 4: Chuyển hướng đến trang chính
-                // Sử dụng replace để không cho phép quay lại trang login bằng nút Back
-                window.location.href = 'index.html';
+                // Bước 4: Chuyển hướng đến trang cần quay lại
+                // Lấy returnUrl từ URL nếu có (lưu trước khi history.replaceState)
+                let returnUrl = null;
+                const urlParams = new URLSearchParams(window.location.search);
+                returnUrl = urlParams.get('returnUrl');
+                
+                if (returnUrl) {
+                    // Redirect về trang người dùng đang cố truy cập
+                    window.location.href = decodeURIComponent(returnUrl);
+                } else {
+                    // Không có returnUrl thì về index
+                    // Sử dụng replace để không cho phép quay lại trang login bằng nút Back
+                    window.location.replace('index.html');
+                }
 
             } catch (error) {
                 console.error('Lỗi đăng nhập:', error);

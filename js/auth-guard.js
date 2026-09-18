@@ -45,7 +45,8 @@ onAuthStateChanged(auth, async (user) => {
     if (!isPublicPage) {
         if (!user) {
             // Chưa đăng nhập -> chuyển về login, lưu lại URL để redirect sau
-            const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+            const currentPath = window.location.pathname + window.location.search;
+            const returnUrl = encodeURIComponent(currentPath);
             window.location.href = `login.html?returnUrl=${returnUrl}`;
             return;
         }
