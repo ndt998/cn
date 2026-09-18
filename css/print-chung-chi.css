@@ -1,0 +1,87 @@
+/* =============================================================================
+   css/print-chung-chi.css — tờ chứng chỉ 19 × 13,5 cm
+   Mọi số đo lấy từ brainstorm.md mục 3. Đã đối chiếu bằng phép đo tự động,
+   sai số ≤ 0,01 mm. Sửa ở đây thì phải đo lại.
+   ============================================================================= */
+@page{ size:190mm 135mm; margin:0 }
+
+.page{
+  position:relative;width:190mm;height:135mm;background:#fff;overflow:hidden;
+  margin:0 auto 12px;box-shadow:0 2px 18px rgba(0,0,0,.45);
+  font-family:"Times New Roman","Tinos","Liberation Serif",serif;
+  font-size:11pt;line-height:1.15;color:#000;
+}
+.ink{position:absolute;inset:0;transform:translate(var(--dx),var(--dy))}
+.doc{position:absolute;left:7.5mm;top:9.5mm;width:172.5mm;height:123mm;display:flex;flex-direction:column}
+.doc>.spacer{flex:1 1 auto;min-height:0}
+
+/* Tab center của Word: chữ căn giữa quanh một tọa độ x và được phép tràn ra
+   ngoài cột. Trình duyệt không căn giữa phần tràn, nên mỗi dòng được cấp một
+   hộp đối xứng quanh đúng tâm đó, rộng hết mức khổ giấy cho phép.
+   --ml: mép trái hộp (tính từ lề trái) · --w: bề rộng hộp · tâm = --ml + --w/2 */
+.cx{text-align:center;margin-left:var(--ml);width:var(--w)}
+
+/* hai khối trên một dòng — hai hộp cạnh nhau, mỗi hộp có tâm riêng */
+.row2{display:grid;align-items:start;margin-left:var(--ml);
+  grid-template-columns:var(--a) var(--b);column-gap:var(--g)}
+.row2>*{text-align:center}
+
+.r1{--ml:2.5mm;--a:80mm;--g:0mm;--b:100mm;margin-top:8pt}  /* tâm 42,5 · 132,5 */
+.r2{--ml:-7.5mm;--a:95mm;--g:10mm;--b:70mm}                /* tâm 40,0 · 132,5 */
+.r8{--ml:0mm;--a:80mm;--g:7.5mm;--b:95mm}                  /* tâm 40,0 · 135,0 */
+
+.r1 .l{letter-spacing:-.7pt}
+.r1 .r{font-weight:bold}
+.r2 .l{letter-spacing:-1.2pt}
+.r2 .r{font-size:12pt;font-weight:bold;text-decoration:underline;text-underline-offset:2px}
+
+.chucdanh-tren{--ml:82.5mm;--w:100mm;font-size:12pt;font-weight:bold;line-height:15pt;margin-top:8pt}
+
+.noidung{margin-left:90mm;width:82.5mm;font-size:12pt}
+.noidung p{margin:3pt 0 0}
+.noidung p:first-child{margin-top:0}
+.noidung b{font-weight:bold}
+.ct{text-align:justify}
+/* chữ đậm phải chảy liền với câu dẫn như mẫu Word — không dùng inline-block */
+
+.ngayky{--ml:87.5mm;--w:95mm;font-size:12pt;font-weight:bold;font-style:italic;margin-top:4pt}
+.chucdanh-ky{--ml:87.5mm;--w:95mm;font-size:12pt;font-weight:bold;line-height:1.15}
+.kygap{height:23mm;min-height:23mm}
+.r8 .l{font-size:11pt}
+.r8 .r{font-size:12pt;font-weight:bold;white-space:nowrap}
+
+/* ============================================================
+   KHUNG CĂN CHỈNH (in lên giấy trắng để soi lên phôi)
+   ============================================================ */
+.guides{position:absolute;inset:0;pointer-events:none;display:none}
+.showguides .guides{display:block}
+.g-paper{position:absolute;inset:0;border:.2mm dashed var(--reg-cyan)}
+.g-margin{position:absolute;left:7.5mm;top:9.5mm;width:172.5mm;height:123mm;border:.2mm solid var(--reg-cyan);opacity:.85}
+.g-v{position:absolute;top:0;bottom:0;width:0;border-left:.2mm solid var(--reg-cyan);opacity:.75}
+.g-lab{position:absolute;top:.6mm;font-family:var(--ui);font-size:6pt;color:var(--reg-mag);transform:translateX(-50%);white-space:nowrap}
+.g-tick{position:absolute;top:0;width:0;height:2mm;border-left:.15mm solid var(--reg-cyan);opacity:.6}
+.g-tickL{position:absolute;left:0;height:0;width:2mm;border-top:.15mm solid var(--reg-cyan);opacity:.6}
+.g-mark{position:absolute;width:4mm;height:4mm;border:.2mm solid var(--reg-mag)}
+
+
+/* ---------- khung xem trước trên màn hình ---------------------------- */
+.ban{background:#23282e;border-radius:8px;padding:18px 12px;overflow:auto}
+.sheets{transform:scale(var(--z,.8));transform-origin:top center;width:190mm;margin:0 auto}
+.thanh-zoom{display:flex;align-items:center;gap:10px;color:#c6ccd3;font-size:12px;margin-bottom:10px;padding:0 6px}
+.thanh-zoom input[type=range]{flex:1;accent-color:#7fb2dd}
+.trong-ban{color:#c6ccd3;text-align:center;padding:40px 0;font-size:13px}
+
+@media print{
+  /* Khung ứng dụng rộng hơn khổ giấy. Không ép các khối bao ngoài về đúng bề rộng
+     trang thì Chrome coi phần thừa bên phải là một trang nữa và in ra tờ trắng.
+     Tuyệt đối không dùng overflow:hidden trên body — nó chặn luôn ngắt trang. */
+  html,body,.vo,.than,.row,.row>*{width:190mm !important;max-width:190mm !important;
+    margin:0 !important;padding:0 !important}
+  .canh,.dinh,.khong-in,.tieu-trang{display:none !important}
+  .vo{display:block} .than{padding:0}
+  body{background:#fff}
+  .ban{background:none;padding:0;border-radius:0;overflow:visible}
+  .sheets{transform:none;width:auto;margin:0}
+  .page{margin:0;box-shadow:none;break-after:page;page-break-after:always}
+  .page:last-child{break-after:auto;page-break-after:auto}
+}

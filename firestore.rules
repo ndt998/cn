@@ -1,0 +1,54 @@
+rules_version = '2';
+/* =============================================================================
+   firestore.rules — dùng cho giai đoạn 1, khi nối Firebase.
+   Đây mới là chỗ chặn thật: chạy trên máy chủ Google, người dùng không sửa được.
+   Mã admin tạm trong js/quyen.js chỉ là chốt cửa giao diện, phải xóa khi bật file này.
+   ============================================================================= */
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    /* --- tiện ích --- */
+    function dangNhap()   { return request.auth != null; }
+    function hoSo()       { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
+    function duocVao()    { return dangNhap() && hoSo().active == true; }
+    function laAdmin()    { return duocVao() && hoSo().vaiTro == 'admin'; }
+
+    /* --- danh sách người dùng: ai cũng đọc được hồ sơ của chính mình,
+           chỉ admin mới thêm, sửa, khóa người khác --- */
+    match /users/{uid} {
+      allow read:  if dangNhap() && (request.auth.uid == uid || laAdmin());
+      allow write: if laAdmin();
+    }
+
+    /* --- lớp học --- */
+    match /classes/{id} {
+      allow read:   if duocVao();
+      allow create: if duocVao();
+      allow update: if duocVao();
+      allow delete: if laAdmin();
+    }
+
+    /* --- chứng chỉ: ID chính là số hiệu đã chuẩn hóa nên không thể cấp trùng.
+           Không cho xóa, chỉ cho đổi trạng thái sang thuHoi. --- */
+    match /certificates/{so} {
+      allow read:   if duocVao();
+      allow create: if duocVao() && !exists(/databases/$(db)/documents/certificates/$(so));
+      allow update: if duocVao();
+      allow delete: if false;
+    }
+
+    match /shipments/{id} { allow read, write: if duocVao(); }
+    match /signers/{id}   { allow read: if duocVao(); allow write: if laAdmin(); }
+    match /settings/{id}  { allow read: if duocVao(); allow write: if laAdmin(); }
+
+    /* --- nhật ký: ai cũng ghi được, CHỈ ADMIN ĐỌC, và không ai sửa hay xóa
+           được dòng đã ghi, kể cả admin. Có vậy dấu vết mới đáng tin. --- */
+    match /nhat_ky/{id} {
+      allow create: if duocVao()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.luc == request.time;
+      allow read:   if laAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+/* =============================================================================
+   css/print-tem.css — nhãn dán bì thư trên giấy A4.
+   Kích thước lấy từ biến, đổi được ngay trên giao diện vì loại giấy tem của
+   Phòng Đào tạo chưa chốt (câu hỏi mở số 5 trong brainstorm.md).
+   Mặc định: 2 cột × 5 hàng = 10 nhãn 105 × 59,4 mm, loại phổ biến nhất.
+   ============================================================================= */
+@page { size: A4 portrait; margin: 0 }
+
+.to-tem{
+  --cot:2; --hang:5; --rong:105mm; --cao:59.4mm;
+  --le-tren:0mm; --le-trai:0mm; --cach-ngang:0mm; --cach-doc:0mm;
+  width:210mm; min-height:297mm; background:#fff; margin:0 auto;
+  padding:var(--le-tren) 0 0 var(--le-trai);
+  display:grid; grid-template-columns:repeat(var(--cot), var(--rong));
+  column-gap:var(--cach-ngang); row-gap:var(--cach-doc);
+  align-content:start; box-shadow:0 2px 18px rgba(0,0,0,.45);
+  font-family:"Times New Roman","Tinos","Liberation Serif",serif; color:#000;
+}
+.tem{width:var(--rong); height:var(--cao); padding:5mm 6mm; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:center; gap:1.1mm;
+  font-size:11pt; line-height:1.3}
+.tem .d{display:flex; gap:1.5mm}
+.tem .d .n{flex:0 0 auto}          /* nhãn trước dấu hai chấm */
+.tem .d .v{flex:1; min-width:0}
+.tem .ten .v{font-weight:bold; font-size:12.5pt}
+.tem .dc .v{font-size:10.5pt}
+.tem .dv .v{font-size:10.5pt}
+.tem.khung{outline:.2mm dashed #00a3c4; outline-offset:-.2mm}
+
+.ban-tem{background:#23282e;border-radius:8px;padding:18px 12px;overflow:auto}
+.to-tem-bọc{transform:scale(var(--zt,.62));transform-origin:top center;width:210mm;margin:0 auto}
+
+@media print{
+  .canh,.dinh,.khong-in,.tieu-trang{display:none !important}
+  .vo{display:block} .than{padding:0}
+  body{background:#fff}
+  .ban-tem{background:none;padding:0;border-radius:0;overflow:visible}
+  .to-tem-bọc{transform:none;width:auto;margin:0}
+  .to-tem{box-shadow:none;margin:0 auto;min-height:0;break-after:page;page-break-after:always}
+  .to-tem:last-child{break-after:auto;page-break-after:auto}
+}
