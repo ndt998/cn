@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.5.1/dist/css/tabler.min.css">
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/print-bang-diem.css">
 <script src="js/vo.js"></script>
 <script src="js/quyen.js"></script>
 <script src="js/nhat-ky.js"></script>
@@ -46,16 +47,547 @@
   <div class="toi-la"><select id="toiLa" aria-label="Bạn là ai"></select></div>
 </header>
 <main class="than">
-<div class="tieu-trang"><div>
-  <h1>Bảng điểm cá nhân</h1><p>Khổ A5 ngang, dựng từ cùng file lớp với chứng chỉ, kèm điểm từng môn và xếp loại tính lại.</p></div></div>
-<div class="card"><div class="trong">
-  <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/><path d="M8 11h8v7h-8l0 -7"/><path d="M8 15h8"/><path d="M11 11v7"/></svg>
-  <h3>Trang này làm ở giai đoạn sau</h3>
-  <p>Cần file mẫu Bang diem KHỔ A5.docx để đối chiếu số đo trước khi dựng.</p>
-  <a class="btn btn-primary" href="chung-chi.html">Sang trang chứng chỉ đang chạy được</a>
-</div></div>
+<div class="tieu-trang">
+  <div>
+    <h1>Bảng điểm cá nhân</h1>
+    <p>Khổ A5 ngang (210×148 mm), in từ dữ liệu lớp đã nạp, tự động tính điểm trung bình và xếp loại.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn" id="btnReset">Khôi phục dữ liệu mẫu</button>
+    <button class="btn btn-primary" id="btnPrint"><svg class="ic me-1" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2"/><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4"/><path d="M7 15a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2l0 -4"/></svg>In</button>
+  </div>
+</div>
+
+<div id="fontwarn"></div>
+
+<div class="row g-3">
+  <!-- ======================= XEM TRƯỚC ======================= -->
+  <div class="col-xl-8">
+    <div class="cot-xem">
+    <div class="ban">
+      <div class="thanh-zoom khong-in">
+        <span>Thu phóng</span>
+        <input type="range" id="zoom" min="40" max="120" step="5" value="75" aria-label="Thu phóng bản xem trước">
+        <span id="zoomval" class="so" style="min-width:3.5em;text-align:right">75 %</span>
+      </div>
+      <div class="sheets" id="sheets"></div>
+    </div>
+    <div id="fitwarn" class="mt-2 khong-in"></div>
+    </div>
+  </div>
+
+  <!-- ======================= BẢNG ĐIỀU KHIỂN ======================= -->
+  <div class="col-xl-4 khong-in">
+
+    <div class="card mb-3">
+      <div class="card-header"><h3 class="card-title">Danh sách</h3>
+        <span class="nhan tam ms-auto" id="nguonDS">dữ liệu mẫu</span></div>
+      <div class="card-body py-3">
+        <div class="d-flex gap-2 flex-wrap">
+          <button class="btn btn-primary btn-sm" id="btnNapBD"><svg class="ic me-1" viewBox="0 0 24 24" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3v12"/><path d="M15 12l-3 3l-3 -3"/><path d="M3 12h1"/><path d="M11 3h1"/><path d="M20 12h1"/><path d="M4 21h16a1 1 0 0 0 1 -1v-4a1 1 0 0 0 -1 -1h-16a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1"/></svg>Nạp Excel</button>
+          <a class="btn btn-sm" href="lop-hoc.html#nap">Nạp kèm soát lỗi</a>
+        </div>
+        <input type="file" id="tepBD" accept=".xls,.xlsx,.xlsm" hidden>
+        <p class="form-hint mt-2" id="ghiNguon">Đang dùng bốn bản ghi mẫu. Nạp file Excel để in danh sách thật.</p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3 class="card-title">Học viên in thử</h3></div>
+      <div class="recs" id="recs"></div>
+      <div class="card-body pt-3">
+        <label class="form-label" for="f_hoTen">Họ và tên</label>
+        <input class="form-control" type="text" id="f_hoTen" data-f="hoTen">
+        <div class="row g-2 mt-0">
+          <div class="col-7"><label class="form-label" for="f_ngaySinh">Ngày sinh</label>
+            <input class="form-control" type="text" id="f_ngaySinh" data-f="ngaySinh" placeholder="dd/mm/yyyy"></div>
+          <div class="col-5"><label class="form-label" for="f_so">Số bảng điểm</label>
+            <input class="form-control" type="text" id="f_so" data-f="so" placeholder="15"></div>
+        </div>
+        <label class="form-label mt-2" for="f_donVi">Đơn vị công tác</label>
+        <input class="form-control" type="text" id="f_donVi" data-f="donVi">
+        <label class="form-label mt-2" for="f_dtb">Điểm trung bình</label>
+        <input class="form-control" type="text" id="f_dtb" data-f="dtb" readonly>
+        <label class="form-label mt-2" for="f_xl">Xếp loại</label>
+        <input class="form-control" type="text" id="f_xl" data-f="xl" readonly>
+        <p class="form-hint mt-2">Bỏ chọn ô vuông để không in bản ghi đó. Bấm vào tên để sửa.</p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3 class="card-title">Thông tin lớp</h3></div>
+      <div class="card-body">
+        <label class="form-label" for="f_tenCT">Tên lớp bồi dưỡng</label>
+        <textarea class="form-control" id="f_tenCT" data-l="tenChuongTrinh" rows="2"></textarea>
+        <div class="row g-2 mt-0">
+          <div class="col-6"><label class="form-label" for="f_tu">Từ ngày</label>
+            <input class="form-control" type="text" id="f_tu" data-l="tuNgay"></div>
+          <div class="col-6"><label class="form-label" for="f_den">Đến ngày</label>
+            <input class="form-control" type="text" id="f_den" data-l="denNgay"></div>
+          <div class="col-6"><label class="form-label" for="f_ky">Ngày ký</label>
+            <input class="form-control" type="text" id="f_ky" data-l="ngayKy"></div>
+          <div class="col-6"><label class="form-label" for="f_dd">Địa danh</label>
+            <input class="form-control" type="text" id="f_dd" data-l="diaDanh"></div>
+        </div>
+        <label class="form-label mt-2" for="f_soBD">Số bảng điểm (mẫu)</label>
+        <input class="form-control" type="text" id="f_soBD" data-l="soBangDiem" placeholder="15/2026-ĐT">
+        <p class="form-hint mt-2">Số này in lên tất cả bảng điểm của lớp. Mỗi học viên không có số riêng.</p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3 class="card-title">Người ký</h3></div>
+      <div class="card-body">
+        <label class="form-label" for="f_cd">Chức danh người ký</label>
+        <input class="form-control" type="text" id="f_cd" data-l="chucDanhKy" placeholder="TRƯỞNG PHÒNG ĐÀO TẠO">
+        <label class="form-label mt-2" for="f_ten">Tên người ký</label>
+        <input class="form-control" type="text" id="f_ten" data-l="tenNguoiKy">
+        <p class="form-hint mt-2">Tên luôn giữ trên một dòng.</p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><h3 class="card-title">Căn chỉnh máy in</h3></div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-6"><label class="form-label" for="f_dx">Lệch ngang dx (mm)</label>
+            <input class="form-control so" type="number" id="f_dx" step="0.5" value="0"></div>
+          <div class="col-6"><label class="form-label" for="f_dy">Lệch dọc dy (mm)</label>
+            <input class="form-control so" type="number" id="f_dy" step="0.5" value="0"></div>
+        </div>
+        <label class="form-label mt-2" for="f_may">Tên máy in</label>
+        <input class="form-control" type="text" id="f_may" placeholder="VD: Canon LBP phòng Đào tạo">
+        <div class="d-flex gap-2 mt-2">
+          <button class="btn btn-sm" id="btnSave">Lưu cho máy này</button>
+          <button class="btn btn-sm" id="btnLoad">Nạp lại</button>
+        </div>
+        <label class="form-check mt-3"><input class="form-check-input" type="checkbox" id="f_guides">
+          <span class="form-check-label">In khung căn chỉnh để soi lên phôi</span></label>
+        <p class="form-hint mt-2">Số dương đẩy chữ sang phải và xuống dưới. Giá trị lưu trong trình duyệt máy này.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Môn học và điểm</h3></div>
+      <div class="card-body">
+        <p class="form-hint">Điểm tự động tính từ file Excel đã nạp. Bảng điểm có 3 môn cố định:</p>
+        <ol class="mb-2">
+          <li>Kiểm tra lần 1: Kiến thức chung</li>
+          <li>Kiểm tra lần 2: Kiến thức kỹ năng, chuyên ngành</li>
+          <li>Tiểu luận cuối khóa</li>
+        </ol>
+        <p class="form-hint mb-0">ĐTB = (môn 1 + môn 2 + môn 3) / 3, làm tròn 1 chữ số thập phân.</p>
+      </div>
+    </div>
+
+    <p class="form-hint mt-3">Lần in đầu: trong hộp thoại in của Chrome bỏ đầu trang và chân trang, Tỉ lệ = 100 %, và khai khổ giấy tùy chỉnh 210 × 148 mm trong driver máy in.</p>
+  </div>
+</div>
 </main>
 </div>
+</div><script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="js/spec.js"></script>
+<script src="js/format.js"></script>
+<script src="js/nhap-excel.js"></script>
+<script type="module">
+/* ============================================================================
+   BẢNG ĐIỂM CÁ NHÂN A5 — TRANG CHÍNH
+   ============================================================================ */
+const SPEC = window.SPEC, F = window.FMT, settings = F.settings;
+const { fmtDay, fmtMonth, fmtDateSlash, fmtDateWords, round1, fmtScore, dtb, xepLoai,
+        scoreWords, normText, parseDate, words, namCua, soDayDu, hauToCua } = F;
+
+/* ============================================================================
+   DỮ LIỆU THỬ — bản mẫu từ Bang diem (KHỔ A5).docx
+   ============================================================================ */
+const MAU_LOP = {
+  tenChuongTrinh: 'Lớp bồi dưỡng theo tiêu chuẩn chức danh nghề nghiệp viên chức chuyên ngành Chẩn đoán bệnh động vật – Khóa 27',
+  tuNgay: '15/7/2026', denNgay: '26/8/2026', ngayKy: '26 tháng 8 năm 2026',
+  diaDanh: 'TP. Hồ Chí Minh',
+  soBangDiem: '15/2026-ĐT',
+  chucDanhKy: 'TRƯỞNG PHÒNG ĐÀO TẠO',
+  tenNguoiKy: 'TS. Nguyễn Công Bình'
+};
+
+const MAU_HV = [
+  { chon:true,  hoTen:'Nguyễn Văn Tú', ngaySinh:'19/03/2001',
+    donVi:'Trung tâm Bảo tồn voi, Cứu hộ động vật và Quản lý bảo vệ rừng',
+    diemMon1: 7.4, diemMon2: 7.4, diemMon3: 6.5,
+    ghi:'Bản mẫu trong Bang diem (KHỔ A5).docx' },
+  { chon:false, hoTen:'Trần Thị Mai Anh', ngaySinh:'12/08/1995',
+    donVi:'Chi cục Chăn nuôi Thú y tỉnh Đắk Lắk',
+    diemMon1: 8.0, diemMon2: 8.5, diemMon3: 9.0,
+    ghi:'Điểm cao · Giỏi' },
+  { chon:false, hoTen:'Lê Hoàng Nam', ngaySinh:'05/11/1988',
+    donVi:'Trung tâm Kỹ thuật Thú y vùng IV',
+    diemMon1: 6.5, diemMon2: 7.0, diemMon3: 6.0,
+    ghi:'Trung bình' },
+  { chon:false, hoTen:'Phạm Thị Thu Hà', ngaySinh:'20/02/1992',
+    donVi:'Sở Nông nghiệp và Môi trường tỉnh Gia Lai',
+    diemMon1: 5.0, diemMon2: 5.5, diemMon3: 5.0,
+    ghi:'Vừa đạt' }
+];
+
+// Tính ĐTB và xếp loại cho mỗi HV
+MAU_HV.forEach(hv => {
+  hv.dtb = round1(dtb([hv.diemMon1, hv.diemMon2, hv.diemMon3]));
+  hv.xl = xepLoai(hv.dtb);
+});
+
+const state = {
+  lop: { ...MAU_LOP },
+  hv:  MAU_HV.map(r => ({ ...r })),
+  chon: 0,
+  dx: 0, dy: 0, may: '',
+  guides: false, zoom: 80,
+  boQuaFont: false
+};
+
+/* ============================================================================
+   DỰNG MỘT TỜ BẢNG ĐIỂM A5
+   ============================================================================ */
+function dungBangDiem(hv, lop, index) {
+  const page = document.createElement('div');
+  page.className = 'page';
+  page.setAttribute('data-hv', hv.hoTen);
+  
+  // Nội dung ink (dời bởi dx/dy khi in)
+  page.innerHTML = `
+<div class="ink">
+  <div class="doc">
+    <!-- HEADER -->
+    <div class="row2 r1">
+      <div class="l"><b>BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG</b></div>
+      <div class="r">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+    </div>
+    <div class="row2 r2">
+      <div class="l"><b>TRƯỜNG CHÍNH SÁCH CÔNG VÀ PTNT</b></div>
+      <div class="r">Độc lập – Tự do – Hạnh phúc</div>
+    </div>
+    
+    <div class="so-ky">Số: ${lop.soBangDiem}</div>
+    
+    <h1 class="tieude">BẢNG ĐIỂM</h1>
+    
+    <p class="tenlop">${normText(lop.tenChuongTrinh)}</p>
+    
+    <!-- THÔNG TIN HỌC VIÊN -->
+    <div class="thong-tin">
+      <div class="dong"><b>Họ và tên:</b> <span>${hv.hoTen}</span></div>
+      <div class="dong"><b>Sinh ngày:</b> <span>${hv.ngaySinh}</span></div>
+      <div class="dong"><b>Đơn vị công tác:</b> <span>${hv.donVi}</span></div>
+      <div class="dong"><b>Khóa học:</b> <span>Từ ngày ${lop.tuNgay} đến ngày ${lop.denNgay}</span></div>
+    </div>
+    
+    <!-- BẢNG ĐIỂM -->
+    <table class="bang-diem">
+      <thead>
+        <tr>
+          <th style="width:10%">STT</th>
+          <th style="width:65%">Môn học</th>
+          <th style="width:25%">Điểm</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Kiểm tra lần 1: Kiến thức chung</td>
+          <td>${fmtScore(hv.diemMon1)}</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Kiểm tra lần 2: Kiến thức kỹ năng, chuyên ngành</td>
+          <td>${fmtScore(hv.diemMon2)}</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Tiểu luận cuối khóa</td>
+          <td>${fmtScore(hv.diemMon3)}</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <!-- TỔNG KẾT -->
+    <div class="tong-ket">
+      <div class="dong"><b>Điểm trung bình chung:</b> <span>${fmtScore(hv.dtb)}</span></div>
+      <div class="dong"><b>Xếp loại:</b> <span>${hv.xl}</span></div>
+    </div>
+    
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="ngayky">${lop.diaDanh}, ngày ${lop.ngayKy}</div>
+      
+      <div class="row2 r8">
+        <div class="l">
+          <div class="chucdanh-tren">TL. HIỆU TRƯỞNG</div>
+          <div class="kygap"></div>
+          <div class="chucdanh-ky">${lop.chucDanhKy}</div>
+        </div>
+        <div class="r">
+          <div class="chucdanh-tren" style="visibility:hidden">TL. HIỆU TRƯỞNG</div>
+          <div class="kygap"></div>
+          <div class="ten-ky"><b>${lop.tenNguoiKy}</b></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- GHI CHÚ -->
+    <div class="ghichu">
+      <b>Ghi chú:</b> Bảng điểm này thay cho sổ điểm. Không cấp lại.
+    </div>
+  </div>
 </div>
+  `.trim();
+  
+  return page;
+}
+
+/* ============================================================================
+   RENDER DANH SÁCH
+   ============================================================================ */
+const sheets = document.getElementById('sheets');
+const recs = document.getElementById('recs');
+
+function render() {
+  // Render preview sheets
+  sheets.innerHTML = '';
+  state.hv.forEach((hv, i) => {
+    if (!hv.chon) return;
+    const sheet = dungBangDiem(hv, state.lop, i);
+    sheets.appendChild(sheet);
+  });
+  
+  // Render recs list
+  recs.innerHTML = '';
+  state.hv.forEach((hv, i) => {
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-center gap-2 mb-2';
+    div.innerHTML = `
+      <input class="form-check-input" type="checkbox" id="chk${i}" ${hv.chon ? 'checked' : ''}>
+      <label class="form-label mb-0" for="chk${i}" style="cursor:pointer;flex:1">
+        <b>${hv.hoTen}</b><br>
+        <small class="text-muted">${hv.donVi} · ĐTB: ${fmtScore(hv.dtb)} (${hv.xl})</small>
+      </label>
+    `;
+    recs.appendChild(div);
+    
+    div.querySelector(`#chk${i}`).addEventListener('change', e => {
+      state.hv[i].chon = e.target.checked;
+      state.chon = state.hv.filter(h => h.chon).length;
+      render();
+    });
+  });
+  
+  // Update form fields
+  const firstSelected = state.hv.find(h => h.chon) || state.hv[0];
+  if (firstSelected) {
+    document.getElementById('f_hoTen').value = firstSelected.hoTen;
+    document.getElementById('f_ngaySinh').value = firstSelected.ngaySinh;
+    document.getElementById('f_so').value = state.lop.soBangDiem.split('/')[0];
+    document.getElementById('f_donVi').value = firstSelected.donVi;
+    document.getElementById('f_dtb').value = fmtScore(firstSelected.dtb);
+    document.getElementById('f_xl').value = firstSelected.xl;
+  }
+  
+  // Update class info fields
+  document.getElementById('f_tenCT').value = state.lop.tenChuongTrinh;
+  document.getElementById('f_tu').value = state.lop.tuNgay;
+  document.getElementById('f_den').value = state.lop.denNgay;
+  document.getElementById('f_ky').value = state.lop.ngayKy;
+  document.getElementById('f_dd').value = state.lop.diaDanh;
+  document.getElementById('f_soBD').value = state.lop.soBangDiem;
+  document.getElementById('f_cd').value = state.lop.chucDanhKy;
+  document.getElementById('f_ten').value = state.lop.tenNguoiKy;
+  
+  // Update counters
+  document.getElementById('ghiNguon').textContent = `Đang dùng ${state.hv.length} bản ghi mẫu. Nạp file Excel để in danh sách thật.`;
+}
+
+/* ============================================================================
+   EVENT HANDLERS
+   ============================================================================ */
+// Zoom control
+document.getElementById('zoom').addEventListener('input', e => {
+  state.zoom = +e.target.value;
+  document.getElementById('zoomval').textContent = state.zoom + ' %';
+  sheets.style.setProperty('--z', state.zoom / 100);
+});
+
+// Print button
+document.getElementById('btnPrint').addEventListener('click', () => {
+  const selected = state.hv.filter(h => h.chon);
+  if (selected.length === 0) {
+    alert('Chọn ít nhất một học viên để in.');
+    return;
+  }
+  window.print();
+});
+
+// Reset button
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (!confirm('Khôi phục dữ liệu mẫu?')) return;
+  state.lop = { ...MAU_LOP };
+  state.hv = MAU_HV.map(r => ({ ...r }));
+  state.hv.forEach(hv => {
+    hv.dtb = round1(dtb([hv.diemMon1, hv.diemMon2, hv.diemMon3]));
+    hv.xl = xepLoai(hv.dtb);
+  });
+  state.chon = 0;
+  render();
+});
+
+// Form field bindings (class info)
+['tenCT', 'tu', 'den', 'ky', 'dd', 'soBD', 'cd', 'ten'].forEach(id => {
+  const el = document.getElementById('f_' + id);
+  const key = id === 'tenCT' ? 'tenChuongTrinh' : 
+              id === 'tu' ? 'tuNgay' : 
+              id === 'den' ? 'denNgay' : 
+              id === 'ky' ? 'ngayKy' : 
+              id === 'dd' ? 'diaDanh' : 
+              id === 'soBD' ? 'soBangDiem' : 
+              id === 'cd' ? 'chucDanhKy' : 'tenNguoiKy';
+  el.addEventListener('input', e => {
+    state.lop[key] = e.target.value;
+    render();
+  });
+});
+
+// Student info bindings
+['hoTen', 'ngaySinh', 'so', 'donVi'].forEach(id => {
+  const el = document.getElementById('f_' + id);
+  const key = id === 'hoTen' ? 'hoTen' : 
+              id === 'ngaySinh' ? 'ngaySinh' : 
+              id === 'so' ? 'so' : 'donVi';
+  el.addEventListener('input', e => {
+    const hv = state.hv.find(h => h.chon);
+    if (hv) {
+      if (key === 'so') {
+        // Cập nhật số bảng điểm từ phần đầu
+        const parts = state.lop.soBangDiem.split('/');
+        parts[0] = e.target.value;
+        state.lop.soBangDiem = parts.join('/');
+      } else {
+        hv[key] = e.target.value;
+      }
+      render();
+    }
+  });
+});
+
+// Machine offset
+document.getElementById('f_dx').addEventListener('input', e => state.dx = +e.target.value);
+document.getElementById('f_dy').addEventListener('input', e => state.dy = +e.target.value);
+document.getElementById('f_may').addEventListener('input', e => state.may = e.target.value);
+document.getElementById('f_guides').addEventListener('change', e => state.guides = e.target.checked);
+
+// Save/Load machine settings
+document.getElementById('btnSave').addEventListener('click', () => {
+  const key = `bangdiem_${state.may || 'default'}`;
+  localStorage.setItem(key, JSON.stringify({ dx: state.dx, dy: state.dy }));
+  alert(`Đã lưu lệch dx=${state.dx}, dy=${state.dy} cho máy "${state.may || 'mặc định'}".`);
+});
+
+document.getElementById('btnLoad').addEventListener('click', () => {
+  const key = `bangdiem_${state.may || 'default'}`;
+  const saved = localStorage.getItem(key);
+  if (saved) {
+    const { dx, dy } = JSON.parse(saved);
+    state.dx = dx;
+    state.dy = dy;
+    document.getElementById('f_dx').value = dx;
+    document.getElementById('f_dy').value = dy;
+    alert(`Đã nạp dx=${dx}, dy=${dy} từ máy "${state.may || 'mặc định'}".`);
+  } else {
+    alert('Chưa có cài đặt nào được lưu cho máy này.');
+  }
+});
+
+// File upload
+document.getElementById('btnNapBD').addEventListener('click', () => {
+  document.getElementById('tepBD').click();
+});
+
+document.getElementById('tepBD').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = new Uint8Array(ev.target.result);
+      const workbook = XLSX.read(data, { type: 'array', cellDates: false });
+      
+      // Đọc sheet đầu tiên
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      // TODO: Parse Excel thành danh sách HV
+      // Tìm dòng tiêu đề
+      let headerRowIdx = 0;
+      let maxCols = 0;
+      for (let i = 0; i < Math.min(15, rows.length); i++) {
+        const row = rows[i] || [];
+        if (row.length > maxCols) {
+          maxCols = row.length;
+          headerRowIdx = i;
+        }
+      }
+
+      // Tạo map tên cột
+      const headers = (rows[headerRowIdx] || []).map(h => String(h || '').trim());
+      const colMap = {};
+      headers.forEach((h, idx) => {
+        const norm = F.khongDau(h.toUpperCase());
+        if (norm.includes('HỌ') || norm.includes('HT') || norm === 'HO VA TEN') colMap.hoTen = idx;
+        else if (norm.includes('NS') || norm.includes('NGÀY SINH')) colMap.ngaySinh = idx;
+        else if (norm.includes('ĐƠN VỊ') || norm.includes('CT') || norm.includes('DV')) colMap.donVi = idx;
+        else if (norm.includes('KIỂM TRA LẦN 1') || norm.includes('MÔN 1')) colMap.mon1 = idx;
+        else if (norm.includes('KIỂM TRA LẦN 2') || norm.includes('MÔN 2')) colMap.mon2 = idx;
+        else if (norm.includes('TIỂU LUẬN') || norm.includes('MÔN 3')) colMap.mon3 = idx;
+      });
+
+      // Parse học viên
+      const newHV = [];
+      for (let i = headerRowIdx + 1; i < rows.length; i++) {
+        const row = rows[i] || [];
+        const hoTen = row[colMap.hoTen];
+        if (!hoTen || String(hoTen).trim() === '') continue;
+
+        const hv = {
+          chon: newHV.length === 0, // Chọn HV đầu tiên
+          hoTen: String(hoTen).trim(),
+          ngaySinh: row[colMap.ngaySinh] ? String(row[colMap.ngaySinh]).trim() : '',
+          donVi: row[colMap.donVi] ? String(row[colMap.donVi]).trim() : '',
+          diemMon1: parseFloat(String(row[colMap.mon1] || '0').replace(',', '.')) || 0,
+          diemMon2: parseFloat(String(row[colMap.mon2] || '0').replace(',', '.')) || 0,
+          diemMon3: parseFloat(String(row[colMap.mon3] || '0').replace(',', '.')) || 0
+        };
+        hv.dtb = round1(dtb([hv.diemMon1, hv.diemMon2, hv.diemMon3]));
+        hv.xl = xepLoai(hv.dtb);
+        newHV.push(hv);
+      }
+
+      if (newHV.length === 0) {
+        alert('Không tìm thấy dữ liệu học viên trong file Excel.');
+        return;
+      }
+
+      state.hv = newHV;
+      state.chon = 0;
+      document.getElementById('ghiNguon').textContent = `Đã nạp ${newHV.length} học viên từ ${file.name}`;
+      render();
+      alert(`Đã nạp ${newHV.length} học viên từ file Excel.`);
+    } catch (err) {
+      alert('Lỗi đọc file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+});
+
+// Initialize
+render();
+</script>
 </body>
 </html>
